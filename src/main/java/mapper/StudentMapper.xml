@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace命名空间，作用就是对sql进行分类化管理，理解sql隔离
+注意:使用mapper代理方法开发，namespace有特殊重要的作用 -->
+<mapper namespace="mapper.StudentMapper">
+    <!-- 在映射文件中配置很多sql语句 -->
+
+    <!-- 需求:通过id查询用户表的记录 -->
+    <!-- 通过select执行数据库查询，
+         id:标示映射文件中的sql，成为Statement的id
+         将sql语句封装到mappedStatement对象中，所以将id称为statement的id,
+
+         parameterType:指定输入参数的类型，
+
+         #{}标示一个占位符,
+
+         #{id}其中id表示接收输入参数的名称，如果输入参数是简单类型，那么#{}中的值可以任意。
+
+         resultType：指定sql输出结果的映射的java对象类型，
+         select指定resultType表示将单条记录映射成java对象-->
+
+    <!-- 定义sql片段
+   id:sql片段的唯一标识
+   在sql片段中不要加入where
+   经验:一般我们定义sql片段是为了可重用性，是基于单表来定义sql片段，
+   这样的话这个sql片段可重用性才高-->
+    <sql id="query_student_where">
+        <if test="studentCustom!=null">
+            <if test="studentCustom.sex!=null and studentCustom.sex!=''">
+                and student.sex=#{studentCustom.sex}
+            </if>
+            <if test="studentCustom.nick_name!=null and studentCustom.nick_name!=''">
+                and student.nick_name like '%${studentCustom.nick_name}%'
+            </if>
+        </if>
+    </sql>
+
+
+    <select id="findStudentById" parameterType="int" resultType="pojo.Student">
+      SELECT * FROM student WHERE id=#{id}
+    </select>
+
+    <!-- ${}:表示拼接sql串，将接收到的参数内容不加任何修饰拼接在sql中。
+         使用${}拼接sql，引起sql注入。
+         ${}中只能使用value-->
+    <select id="findStudentByNick_name" parameterType="java.lang.String"
+            resultType="pojo.Student">
+    select * from student where nick_name like '%${value}%'
+    </select>
+
+    <!-- 添加用户
+        parameterType：指定输入参数类型是pojo(包括用户信息)
+        #{}中指定POJO的属性名，接收到POJO对象的属性值，mybatis通过OGNL获取对象的属性
+       -->
+    <insert id="insertStudent" parameterType="pojo.Student">
+	insert into student(account_name,pwd,Nick_name,birth_day) value(#{account_name},#{pwd},#{nick_name},#{birth_day}.)
+    </insert>
+
+    <update id="updateUser" parameterType="Student" flushCache="true">
+        update Student set
+          account_name =#{account_name},
+          password = #{password}
+          sex=#{sex}
+         where id = #{id}
+    </update>
+
+
+
+    <!-- 用户信息综合查询
+    #{UserCustom.sex}取出包装对象中性别值
+    ${UserCustom.username}取得pojo包装对象中用户名称
+    -->
+    <select id="findStudentList" parameterType="pojo.StudentQueryVo"
+            resultType="pojo.StudentCustom">
+        select * from student
+        <!-- where标签可以自动去掉第一个and -->
+        <where>
+            <!-- 应用sql片段的id，如果refid指定的id不再本mapper文件中，需要前边加namespace -->
+            <include refid="query_student_where"></include>
+            <!-- 在这里还可能要引用其他的sql片段 -->
+        </where>
+    </select>
+
+    <!-- 用户信息综合查询总数 -->
+    <select id="findUserCount" parameterType="pojo.StudentQueryVo" resultType="int">
+        select count(*) from STUDENT
+        <!-- where标签可以自动去掉第一个and -->
+        <where>
+            <!-- 应用sql片段的id，如果refid指定的id不再本mapper文件中，需要前边加namespace -->
+            <include refid="query_student_where"></include>
+            <!-- 在这里还可能要引用其他的sql片段 -->
+        </where>
+    </select>
+
+
+</mapper>

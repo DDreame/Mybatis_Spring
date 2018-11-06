@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="db.properties"></properties>
+
+    <settings>
+        <!-- 打开延迟加载的开关 -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!-- 将积极加载改为消极加载(及按需加载) -->
+        <setting name="aggressiveLazyLoading" value="false"/>
+        <!--mybaits的二级缓存是mapper范围级别，除了在Config.xml设置二级缓存的总开关，还要在具体的mapper.xml中开启二级缓存。
+            现将二级缓存打开-->
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+
+
+    <typeAliases>
+        <!-- 批量定义别名
+        指定包名，mybatis自动扫描包中的PO类，自动定义别名，别名就是类名(首字母大写或小写) -->
+        <package name="pojo"/>
+    </typeAliases>
+
+    <environments default="development">
+        <environment id="development">
+            <!-- 使用jdbc事务管理-->
+            <transactionManager type="JDBC" />
+            <!-- 数据库连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+
+                <property name="poolMaximumIdleConnections" value="${jdbc.poolMaximumIdleConnections}"/>
+                <property name="poolMaximumActiveConnections" value="${jdbc.poolMaximumActiveConnections}"/>
+                <property name="poolPingQuery" value="${jdbc.poolPingQuery}"/>
+                <property name="poolPingEnabled" value="${poolPingEnabled}"/>
+
+            </dataSource>
+        </environment>
+    </environments>
+
+
+
+    <mappers>
+        <!-- 批量加载mapper
+   指定mapper接口的报名，mybatis自动扫描包下所有mapper接口进行加载。
+   遵循一些规则：需要将mapper接口的类名和mapper.xml映射文件名称保持一致，且在一个目录中。
+   上面规范的前提是，使用的是mapper代理方法
+   -->
+        <!-- 通过resource方法一次加载一个映射文件 -->
+
+        <package name="mapper"/>
+    </mappers>
+
+</configuration>
